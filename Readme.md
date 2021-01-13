@@ -68,7 +68,7 @@ The default settings are managed in the settings.json file. These are the 'Appli
 The following settings are the 'User settings':
 
 | Parameter | Explaination |
-| ------------- |:-------------:| -----:|
+| ------------- |-------------|
 | azureDevOpsOrganisationName | Do not process usernames with the following terms (comma seperated). Is used for service accounts |
 | personalAccessToken | The PAT that is used for Azure DevOps. Requires Project Collection Administrator permissions |
 | AADGraphDirectoryId | The AAD Directory ID (Tenant) |
