@@ -4,7 +4,7 @@ trigger:
 variables:
   azureResourceManagerConnection: 'Functions'
   azureFunctionsAppName: 'AzureDevOpsFunct'
-  azureDevOpsOrganisationName: foxholenl
+  azureDevOpsOrganisationName: ''
   azureDevOpsPersonalAccessToken: ''
   AADGraphDirectoryId: ''
   AADGraphApplicationId: ''
