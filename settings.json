@@ -1,0 +1,11 @@
+{
+    "numberOfDaysNotLoggedInForDeletionOfUser": 186,
+    "numberOfDaysNotLoggedInToBecomeStakeholder": 93,
+    "numberOfDaysToWaitAfterUserIsCreated": 31,
+    "groupEntitlementPrefix": "All users - ",
+    "groupEntitlementPostfix": " License",
+    "azureDevOpsVSAexBaseUrl": "https://vsaex.dev.azure.com",
+    "disableAPIOperations": true,
+    "AADGraphOAuthEndPoint": "https://login.microsoftonline.com",  
+    "excludedWordsInUserNames": "svc,service"
+}
