@@ -1,12 +1,12 @@
 # Manage Azure DevOps User Licenses
 
-This little utility manages the Azure DevOps User Licenses. Most organisations use Azure Active Directory (AAD) groups to manage the permissions of users within projects.
+This little utility manages the Azure DevOps User Licenses. Most organizations use Azure Active Directory (AAD) groups to manage the permissions of users within projects.
 
-When a new AAD user enters the Azure DevOps organisation for the first time, the user is created within the Azure DevOps organisation and the user gets a license assigned. This is the so called 'User Entitlement'.
+When a new AAD user enters the Azure DevOps organization for the first time, the user is created within the Azure DevOps organization and the user gets a license assigned. This is the so called 'User Entitlement'.
 
 However, there are two problems with the link between Azure DevOps and Azure Active Directory:
 
-- When the user is deleted (or made inactive) in the AAD, the user is still active in Azure DevOps. The user cannot login anymore through the web interface but the personal access tokens are still active. Next to that, the user still occupies an Azure DevOps license and when this is not set to 'Stakeholder' you need to pay monthly for this;
+- When the user is deleted (or made inactive) in the AAD, the user is still active in Azure DevOps. The user cannot login anymore through the web interface but the personal access tokens are still active. 
 - When an user is not using Azure DevOps, the user might occupy a paid license;
 
 To save money and to lower security risks, this little utility is created. It creates four so called 'Group Entitlements' and make users member of those Group Entitlements.
@@ -26,7 +26,7 @@ I recommend to run this utility first in test mode with the disableAPIOperations
 
 ### Setup Azure DevOps
 
-The default license is set in the 'Billing' screen in the 'Organisational Settings'. I recommend that the value of 'Default access level for new users' is set to 'Basic'.
+The default license is set in the 'Billing' screen in the 'Organizational Settings'. I recommend that the value of 'Default access level for new users' is set to 'Basic'.
 
 ### Setup Azure Active Directory
 
@@ -44,6 +44,7 @@ You need to register an App into your Azure Active Directory configuration
    1. Choose 'Add permission' and then 'Microsoft Graph'
    2. Choose 'Application permissions;
       1. Select 'User.Read.All and then 'Add Permission'
+      2. If you want to delete users from AAD after they did not sign in for a certain period, also include AuditLogs.Read.All and Organization.Read.All
    3. Click on 'Grant admin consent..'
 6. Goto your App registration 'Certificates & Secrets'
    1. Create a new 'Client Secret'
@@ -63,13 +64,14 @@ The default settings are managed in the settings.json file. These are the 'Appli
 | azureDevOpsVSAexBaseUrl | The Azure DevOps VSAEX api url | <https://vsaex.dev.azure.com> |
 | disableAPIOperations | When set to true, there are no API change operations (Create, Update, Delete) | true |
 | AADGraphOAuthEndPoint | The Azure AAD Url | <https://login.microsoftonline.com> |
-| excludedWordsInUserNames | Do not process usernames with the following terms (comma seperated). Is used for service accounts | svc,service|
+| excludedWordsInUserNames | Do not process UPN's with the following terms (comma seperated). Is used for service accounts | svc,service|
+| excludedUPNs | Do not process the following UPN's (comma seperated). | empty |
 
 The following settings are the 'User settings':
 
 | Parameter | Explaination |
 | ------------- |-------------|
-| azureDevOpsOrganisationName | Do not process usernames with the following terms (comma seperated). Is used for service accounts |
+| azureDevOpsOrganizationName | The organization name |
 | personalAccessToken | The PAT that is used for Azure DevOps. Requires Project Collection Administrator permissions |
 | AADGraphDirectoryId | The AAD Directory ID (Tenant) |
 | AADGraphApplicationId | The registered AAD Application ID for this utility |

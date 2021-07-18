@@ -2,6 +2,7 @@ import * as rm from 'typed-rest-client/RestClient';
 import { IHeaders, IHttpClientResponse, IRequestOptions } from "typed-rest-client/Interfaces";
 import qs from 'qs';
 import { Logger } from './Logger';
+import { Settings } from './Settings';
 
 export class AzureConnection {
   private restClient: rm.RestClient;
@@ -59,13 +60,33 @@ export class AzureConnection {
    * @param { string } url Url to get
    * @return { IHttpClientResponse } the response
    */
-  static async HttpGet(url: string): Promise<IHttpClientResponse> | undefined{
+  static async HttpGet(url: string): Promise<IHttpClientResponse> | undefined {
     try {
       const result = await AzureConnection.instance.restClient.client.get(url);
       return result;
     }
     catch (err) {
       Logger.log(`Error connecting to Azure Active Directory. Error: ${err.message}`);
+    }
+  }
+
+  /**
+ * HTTP Delete Request
+ * @param { string } url Url to get
+ * @return { IHttpClientResponse } the response
+ */
+  static async HttpDelete(url: string): Promise<IHttpClientResponse> | undefined {
+    if (!Settings.getConfiguration().disableAPIOperations) {
+      try {
+        const result = await AzureConnection.instance.restClient.client.del(url);
+        return result;
+      }
+      catch (err) {
+        Logger.log(`Error connecting to Azure Active Directory. Error: ${err.message}`);
+      }
+    }
+    else {
+      Logger.log(`'disableAPIOperations' is set to true, so API operations are disabled`);
     }
   }
 }

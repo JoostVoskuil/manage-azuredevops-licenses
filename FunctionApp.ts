@@ -1,7 +1,7 @@
 import { AzureConnection } from "./AzureConnection";
 import { AzureDevOpsConnection } from "./AzureDevopConnection";
 import { IManageLicenseConfiguration, Settings } from "./Settings";
-import { AzureDevOpsOrganisation } from "./AzureDevOpsOrganisation";
+import { AzureDevOpsOrganization } from "./AzureDevOpsOrganization";
 import { AzureFunction, Context } from "@azure/functions"
 import { Logger, LoggerType } from "./Logger";
 
@@ -18,16 +18,18 @@ const AzureDevOpsLicensesTrigger: AzureFunction = async function (context: Conte
         AADGraphDirectoryId: process.env['AADGraphDirectoryId'],
         AADGraphOAuthEndPoint: process.env['AADGraphOAuthEndPoint'],
         excludedWordsInUserNames: process.env['excludedWordsInUserNames'],
+        excludedUPNs: process.env['excludedUPNs'],
+        deleteAADUsers: process.env['deleteAADUsers'] ? Boolean(process.env['deleteAADUsers']): false,
         azureDevOpsApiUrl: process.env['azureDevOpsApiUrl'],
         azureDevOpsVSAexBaseUrl: process.env['azureDevOpsVSAexBaseUrl'],
-        azureDevOpsOrganisationName: process.env['azureDevOpsOrganisationName'],
+        azureDevOpsOrganizationName: process.env['azureDevOpsorganizationName'],
         disableAPIOperations: process.env['disableAPIOperations'] ? Boolean(process.env['disableAPIOperations']): false,
     };
 
-    if (!environmentConfiguration.azureDevOpsOrganisationName ||
+    if (!environmentConfiguration.azureDevOpsOrganizationName ||
         !environmentConfiguration.AADGraphDirectoryId ||
         !environmentConfiguration.AADGraphApplicationId) {
-        context.log.error('azureDevOpsOrganisationName or AADGraphDirectoryId or AADGraphApplicationId not set');
+        context.log.error('azureDevOpsorganizationName or AADGraphDirectoryId or AADGraphApplicationId not set');
         return;
     }
 
@@ -41,16 +43,16 @@ const AzureDevOpsLicensesTrigger: AzureFunction = async function (context: Conte
         return;
     }
 
-    // Process Organisation
-    await processOrganisation(azureDevOpsPersonalAccessToken, AADGraphApplicationToken);
+    // Process organization
+    await processorganization(azureDevOpsPersonalAccessToken, AADGraphApplicationToken);
 };
 
 /**
- * Processes the licenses in the organisation
+ * Processes the licenses in the organization
  * @param { string } azureDevOpsPersonalAccessToken PAT Token for Azure DevOps (requres Project Collection Administration rights)
  * @param { string } AADGraphApplicationToken Secret of Azure AAD App Registration
  */
-async function processOrganisation(azureDevOpsPersonalAccessToken: string, AADGraphApplicationToken: string): Promise<void> {
+async function processorganization(azureDevOpsPersonalAccessToken: string, AADGraphApplicationToken: string): Promise<void> {
     const azureDevOpsApiUrl = Settings.getConfiguration().azureDevOpsApiUrl;
     const oauthEndPoint = Settings.getConfiguration().AADGraphOAuthEndPoint;
     const msGraphDirectoryId = Settings.getConfiguration().AADGraphDirectoryId;
@@ -58,8 +60,8 @@ async function processOrganisation(azureDevOpsPersonalAccessToken: string, AADGr
 
     AzureConnection.Initialize(oauthEndPoint, msGraphDirectoryId, msGraphApplicationId, AADGraphApplicationToken);
     AzureDevOpsConnection.Initialize(azureDevOpsApiUrl, azureDevOpsPersonalAccessToken);
-    const azureDevOpsOrganisation: AzureDevOpsOrganisation = await AzureDevOpsOrganisation.CreateAsync(Settings.getConfiguration().azureDevOpsOrganisationName);
-    await azureDevOpsOrganisation.processUserAccounts();
+    const azureDevOpsorganization: AzureDevOpsOrganization = await AzureDevOpsOrganization.CreateAsync(Settings.getConfiguration().azureDevOpsOrganizationName);
+    await azureDevOpsorganization.processUserAccounts();
 }
 
 export default AzureDevOpsLicensesTrigger;

@@ -9,10 +9,10 @@ export class AzureDevOpsConnection {
 
   /**
    * Private constructpr
-   * @param { string } organisationUrl The url of the organisation
+   * @param { string } organizationUrl The url of the organization
    * @param { string } token PAT token
    */
-  private constructor(organisationUrl: string, token: string) {
+  private constructor(organizationUrl: string, token: string) {
     const userAgent = 'Azure DevOps';
     const requestHeaders: IHeaders = {};
     requestHeaders['Content-Type'] = 'application/json';
@@ -24,16 +24,16 @@ export class AzureDevOpsConnection {
       headers: requestHeaders,
     };
 
-    this.restClient = new rm.RestClient(userAgent, organisationUrl, undefined, requestOptions);
+    this.restClient = new rm.RestClient(userAgent, organizationUrl, undefined, requestOptions);
   }
   /**
    * Static initializer for the Azure DevOps Connection
-   * @param { string } organisationUrl The url of the organisation
+   * @param { string } organizationUrl The url of the organization
    * @param { string } personalAccessToken Full Access (Project Collection Administrator) PAT
    * @return { AzureDevOpsConnection } returns the connection
    */
-  static Initialize(organisationUrl: string, personalAccessToken: string): AzureDevOpsConnection {
-    AzureDevOpsConnection.instance = new AzureDevOpsConnection(organisationUrl, personalAccessToken);
+  static Initialize(organizationUrl: string, personalAccessToken: string): AzureDevOpsConnection {
+    AzureDevOpsConnection.instance = new AzureDevOpsConnection(organizationUrl, personalAccessToken);
     return AzureDevOpsConnection.instance;
   }
 

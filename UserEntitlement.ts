@@ -1,6 +1,5 @@
 import { plainToClass } from "class-transformer";
 import 'reflect-metadata';
-import { AzureConnection } from "./AzureConnection";
 import { AzureDevOpsConnection } from "./AzureDevopConnection";
 import { GroupEntitlement } from "./GroupEntitlement";
 import { License, LicenseRule } from "./LicenseRule";
@@ -15,11 +14,10 @@ export class UserEntitlement {
     public lastAccessedDate?: Date;
     public dateCreated: Date;
     public GroupAssignments?: GroupEntitlement[];
-    public isActive?: boolean = true;
 
     /**
      * Adds the User Entitlement to a Group Entitlement
-     * @param { GroupEntitlement[] } availableGroupEntitlements the organisation Group Entitlements
+     * @param { GroupEntitlement[] } availableGroupEntitlements the organization Group Entitlements
      * @param { License } license the license where the user needs to be made member of 
      * @return { UserEntitlement } this
      */
@@ -49,10 +47,10 @@ export class UserEntitlement {
      * Deletes the user entitlement
      * @return { undefined } undefined
      */
-    public async delete(): Promise<undefined> {
+    public async deleteFromAzureDevOps(): Promise<undefined> {
         await AzureDevOpsConnection.del<IUserEntitlementResponse>(`_apis/userentitlements/${this.id}?api-version=6.1-preview.3`);
 
-        Logger.log(`Deleted User '${this.user.displayName}' from organisation.`);
+        Logger.log(`Deleted User '${this.user.displayName}' from organization.`);
         return undefined;
     }
 
@@ -111,7 +109,7 @@ export class UserEntitlement {
 
     /**
      * Adds user to the correct group Entitlement
-     * @param { GroupEntitlement[] } groupEntitlements the group entitlements of this organisation (provided by this application)
+     * @param { GroupEntitlement[] } groupEntitlements the group entitlements of this organization (provided by this application)
      * @return { UserEntitlement } this
      */
     public async addUserToAGroupEntitlementBasedOnLicense(groupEntitlements: GroupEntitlement[]): Promise<this> {
@@ -138,54 +136,13 @@ export class UserEntitlement {
      * Checks if user should be deleted
      * @return { boolean } true if this user should be deleted from Azure DevOps
      */
-    public async shouldUserBeDeleted(): Promise<boolean> {
+    public async shouldUserBeDeletedFromAzureDevOps(): Promise<boolean> {
         // Delete user from the organization if the user did not login in the last period.
         if (this.lastAccessedDate < Settings.getConfiguration().dateDeleteBeforeLastAccessDate &&
             this.dateCreated < Settings.getConfiguration().dateProcessAfterCreatedOnDate) {
             return true;
         }
-
-        // Delete user from the organisation if the user is not in AAD or is disabled
-        if (await this.isUserActiveInAAD() === false) {
-            return true;
-        }
         return false;
-    }
-
-    /**
-     * Checks if user is active in the AAD
-     * @return { boolean } true if this user is active
-     */
-    private async isUserActiveInAAD(): Promise<boolean> {
-        const url = `https://graph.microsoft.com/v1.0/users/${this.user.principalName}?$select=id,accountEnabled,deletedDateTime,userPrincipalName`;
-        const response = await AzureConnection.HttpGet(url);
-        const graphUser: IGraphUser = JSON.parse(await (response.readBody()));
-
-        if (graphUser.error && graphUser.error.code === 'Request_ResourceNotFound') {
-            Logger.log(`User '${this.user.principalName}' cannot be found in AAD.`);
-            this.isActive = false;
-        }
-        else if (graphUser.accountEnabled === false) {
-            Logger.log(`User '${this.user.principalName}' account is inactive.`);
-            this.isActive = false;
-        }
-        else if (graphUser.deletedDateTime !== null) {
-            Logger.log(`User '${this.user.principalName}' is deleted on ${graphUser.deletedDateTime}.`);
-            this.isActive = false;
-        }
-        return this.isActive;
-    }
-}
-
-// The Graph User Interface comming from the AAD
-interface IGraphUser {
-    id?: string,
-    deletedDateTime?: string,
-    accountEnabled?: boolean,
-    userPrincipalName?: string,
-    error?: {
-        code?: string,
-        message?: string
     }
 }
 

@@ -8,39 +8,53 @@ import { Settings } from "./Settings";
 import { UserEntitlement } from "./UserEntitlement";
 import { Group } from "./Group";
 import { Logger } from "./Logger";
+import { GraphUser } from "./GraphUser";
 
-export class AzureDevOpsOrganisation {
+export class AzureDevOpsOrganization {
     private groupEntitlements: GroupEntitlement[];
     private userEntitlements: UserEntitlement[];
-    private organisationName: string;
+    private organizationName: string;
 
     /**
      * Async constructor. Fetches all the groups and user entitlements
-     * @param { string } organisationName The name of the organisation
-     * @return { AzureDevOpsOrganisation } this object
+     * @param { string } organizationName The name of the organization
+     * @return { AzureDevOpsOrganization } this object
      */
-    public static async CreateAsync(organisationName: string): Promise<AzureDevOpsOrganisation> {
-        const thisOrganisation = new AzureDevOpsOrganisation();
-        thisOrganisation.organisationName = organisationName;
+    public static async CreateAsync(organizationName: string): Promise<AzureDevOpsOrganization> {
+        const thisorganization = new AzureDevOpsOrganization();
+        thisorganization.organizationName = organizationName;
 
-        await thisOrganisation.getAllGroupEntitlements();
-        await thisOrganisation.getAllUserEntitlements();
-        await thisOrganisation.createNeededGroupEntitlements();
-        return thisOrganisation;
+        await thisorganization.getAllGroupEntitlements();
+        await thisorganization.getAllUserEntitlements();
+        await thisorganization.createNeededGroupEntitlements();
+        return thisorganization;
     }
 
     /**
      * Processes all the userEntitlements
-     * @return { AzureDevOpsOrganisation } this object
+     * @return { AzureDevOpsOrganization } this object
      */
     public async processUserAccounts(): Promise<this> {
         if (!this.userEntitlements) return this;
         for (const userEntitlement of this.userEntitlements) {
-            Logger.log(`Process '${userEntitlement.user.displayName}' with lastAccessDate '${userEntitlement.lastAccessedDate}' and license '${userEntitlement.accessLevel.licenseDisplayName}'`);
+            Logger.log(`Process '${userEntitlement.user.displayName}' with Azure DevOps lastAccessDate '${userEntitlement.lastAccessedDate}' and license '${userEntitlement.accessLevel.licenseDisplayName}'`);
 
-            // Delete user from the organization if the user did not login in the last period or user is not active in AAD
-            if (await userEntitlement.shouldUserBeDeleted() === true) {
-                await userEntitlement.delete();
+            // Get AAD User
+            const aadUser = await new GraphUser().getAADGraphUser(userEntitlement.user.principalName);
+            // Delete user from Azure DevOps when user not active in AAD
+            if (await aadUser.isActiveInAAD() === false) {
+                await userEntitlement.deleteFromAzureDevOps();
+                continue;
+            }
+            // Delete user from AAD and Azure DevOps when user did not login in the last period
+            else if (Settings.getConfiguration().deleteAADUsers && await aadUser.shouldBeDeletedFromAAD() === true) {
+                await aadUser.deleteFromAAD();
+                await userEntitlement.deleteFromAzureDevOps();
+                continue;          
+            }
+            // Delete user from the organization if the user did not login in the last period
+            else if (await userEntitlement.shouldUserBeDeletedFromAzureDevOps() === true) {
+                await userEntitlement.deleteFromAzureDevOps();
                 continue;
             }
 
@@ -62,7 +76,7 @@ export class AzureDevOpsOrganisation {
 
     /**
      * Creates all the needed Group Entitlements for License management
-     * @return { AzureDevOpsOrganisation } this object
+     * @return { AzureDevOpsOrganization } this object
      */
     private async createNeededGroupEntitlements(): Promise<this> {
         for (const licenseDisplayName of Object.values(License)) {
@@ -77,27 +91,31 @@ export class AzureDevOpsOrganisation {
     }
 
     /**
-     * Gets all the user Entitlements of this organisation
-     * @return { AzureDevOpsOrganisation } this object
+     * Gets all the user Entitlements of this organization
+     * @return { AzureDevOpsOrganization } this object
      */
     private async getAllUserEntitlements(): Promise<this> {
         const excludedWords = Settings.getConfiguration().excludedWordsInUserNames;
+        const excludedUPNs = Settings.getConfiguration().excludedUPNs;
         // Use old version of the API. Newer versions don't support top/continuationtoken
         const response = await AzureDevOpsConnection.get<IUserEntitlementResponse>(`_apis/userentitlements?api-version=4.1-preview.1&top=10000&select=Grouprules`);
-        const userEntitlements = response.result.value.filter(x => !this.containsAny(x.user.displayName, excludedWords));
-        Logger.log(`Fetched ${userEntitlements.length} users from Azure DevOps Organisation '${this.organisationName}'`);
+        // filter excluded words
+        let userEntitlements = response.result.value.filter(x => !this.containsAny(x.user.displayName, excludedWords));
+        // filter excluded upn's
+        userEntitlements = response.result.value.filter(x => !this.containsAny(x.user.displayName, excludedUPNs));
+        Logger.log(`Fetched ${userEntitlements.length} users from Azure DevOps organization '${this.organizationName}'`);
         this.userEntitlements = plainToClass(UserEntitlement, userEntitlements);
         return this;
     }
 
     /**
-     * Gets all the Group Entitlements of this organisation
-     * @return { AzureDevOpsOrganisation } this object
+     * Gets all the Group Entitlements of this organization
+     * @return { AzureDevOpsOrganization } this object
      */
     private async getAllGroupEntitlements(): Promise<this> {
         const response = await AzureDevOpsConnection.get<IGroupEntitlementResponse>(`_apis/groupentitlements?api-version=6.0-preview.1`);
         this.groupEntitlements = plainToClass(GroupEntitlement, response.result.value);
-        Logger.log(`Fetched ${response.result.value.length} Group Entitlements from Azure DevOps Organisation ${this.organisationName}`);
+        Logger.log(`Fetched ${response.result.value.length} Group Entitlements from Azure DevOps organization ${this.organizationName}`);
         return this;
     }
 
@@ -105,7 +123,7 @@ export class AzureDevOpsOrganisation {
      * Adds a new Group Entitlement
      * @param { string } groupEntitlementDisplayName Display name of the group
      * @param { License } license The License
-     * @return { AzureDevOpsOrganisation } this object
+     * @return { AzureDevOpsOrganization } this object
      */
     private async addGroupEntitlement(groupEntitlementDisplayName: string, license: License): Promise<this> {
         let licensingSource = '1';
@@ -147,7 +165,7 @@ export class AzureDevOpsOrganisation {
             assignmentSource: '1'
         };
 
-        const groupEntitlement = new GroupEntitlement() 
+        const groupEntitlement = new GroupEntitlement()
             .withGroup(group)
             .withLicenseRule(licenseRule);
 
@@ -159,7 +177,7 @@ export class AzureDevOpsOrganisation {
     /**
      * Re-evaluates the group entitlements.
      * Note: uses an undocumented API
-     * @return { AzureDevOpsOrganisation } this object
+     * @return { AzureDevOpsOrganization } this object
      */
     private async reevaluateGroupEntitlementRules(): Promise<this> {
         Logger.log(`Re-evaluating Rules.`);
@@ -173,11 +191,11 @@ export class AzureDevOpsOrganisation {
      * @param dictionary 
      * @return { boolean } true if found, false if not found
      */
-    private containsAny(searchString, dictionary) {
+    private containsAny(searchString: string, dictionary: string): boolean {
         const dictionaryArray = dictionary.split(',');
         for (let i = 0; i != dictionaryArray.length; i++) {
-            const substring = dictionaryArray[i];
-            if (searchString.indexOf(substring) != - 1) {
+            const substring: string = dictionaryArray[i];
+            if (searchString.toLowerCase().indexOf(substring.toLowerCase()) != - 1) {
                 return true;
             }
         }

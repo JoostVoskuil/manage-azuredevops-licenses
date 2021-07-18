@@ -4,7 +4,7 @@ export class Logger {
         private static loggerType: LoggerType;
         private static context: Context;
 
-        static Initialize(loggerType: LoggerType, context?: Context) {
+        static Initialize(loggerType: LoggerType, context?: Context): void {
                 this.loggerType = loggerType;
                 this.context = context;
         }

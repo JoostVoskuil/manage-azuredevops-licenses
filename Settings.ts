@@ -34,7 +34,7 @@ export class Settings {
         const savedConfiguration: IManageLicenseConfiguration = require('./settings.json');
         // merge configuration
         const configuration = Settings.mergeConfiguration(givenConfiguration, savedConfiguration);
-        configuration.azureDevOpsApiUrl = `${configuration.azureDevOpsVSAexBaseUrl}/${configuration.azureDevOpsOrganisationName}/`;
+        configuration.azureDevOpsApiUrl = `${configuration.azureDevOpsVSAexBaseUrl}/${configuration.azureDevOpsOrganizationName}/`;
         Settings.instance = new Settings(configuration);
         configuration.dateDeleteBeforeLastAccessDate = addDays(new Date(), -1 * Settings.instance._configuration.numberOfDaysNotLoggedInForDeletionOfUser);
         configuration.dateMakeStakeholderBeforeLastAccessDate = addDays(new Date(), -1 * Settings.instance._configuration.numberOfDaysNotLoggedInToBecomeStakeholder);
@@ -76,8 +76,10 @@ export interface IManageLicenseConfiguration {
     AADGraphDirectoryId?: string;
     AADGraphOAuthEndPoint?: string;
     excludedWordsInUserNames?: string;
+    excludedUPNs?: string;
     azureDevOpsApiUrl?: string;
     azureDevOpsVSAexBaseUrl?: string;
-    azureDevOpsOrganisationName?: string;
+    azureDevOpsOrganizationName?: string;
     disableAPIOperations?: boolean;
+    deleteAADUsers?: boolean;
 }
