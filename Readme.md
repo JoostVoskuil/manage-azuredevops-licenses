@@ -64,7 +64,7 @@ The default settings are managed in the settings.json file. These are the 'Appli
 | azureDevOpsVSAexBaseUrl | The Azure DevOps VSAEX api url | <https://vsaex.dev.azure.com> |
 | disableAPIOperations | When set to true, there are no API change operations (Create, Update, Delete) | true |
 | AADGraphOAuthEndPoint | The Azure AAD Url | <https://login.microsoftonline.com> |
-| excludedWordsInUserNames | Do not process UPN's with the following terms (comma seperated). Is used for service accounts | svc,service|
+| excludedWordsInUPNs | Do not process UPN's with the following terms (comma seperated). Is used for service accounts | svc,service|
 | excludedUPNs | Do not process the following UPN's (comma seperated). | empty |
 
 The following settings are the 'User settings':

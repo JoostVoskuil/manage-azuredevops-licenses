@@ -3,8 +3,8 @@ trigger:
   
   variables:
     azureResourceManagerConnection: 'Functions'
-    azureFunctionsAppName: 'AzureDevOpsFunct'
-    azureDevOpsOrganisationName: ''
+    azureFunctionsAppName: 'AzureDevOpsFunction'
+    azureDevOpsOrganizationName: ''
     azureDevOpsPersonalAccessToken: ''
     AADGraphDirectoryId: ''
     AADGraphApplicationId: ''
@@ -43,4 +43,4 @@ trigger:
       appType: 'functionAppLinux'
       appName: $(azureFunctionsAppName)
       package: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-      appSettings: '-azureDevOpsOrganisationName $(azureDevOpsOrganisationName) -azureDevOpsPersonalAccessToken $(azureDevOpsPersonalAccessToken) -AADGraphDirectoryId $(AADGraphDirectoryId) -AADGraphApplicationId $(AADGraphApplicationId) -AADGraphApplicationToken $(AADGraphApplicationToken) -disableAPIOperations $(disableAPIOperations) -deleteAADUsers $(deleteAADUsers)'
+      appSettings: '-azureDevOpsOrganizationName $(azureDevOpsOrganizationName) -azureDevOpsPersonalAccessToken $(azureDevOpsPersonalAccessToken) -AADGraphDirectoryId $(AADGraphDirectoryId) -AADGraphApplicationId $(AADGraphApplicationId) -AADGraphApplicationToken $(AADGraphApplicationToken) -disableAPIOperations $(disableAPIOperations) -deleteAADUsers $(deleteAADUsers)'

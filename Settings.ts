@@ -75,7 +75,7 @@ export interface IManageLicenseConfiguration {
     AADGraphApplicationId?: string;
     AADGraphDirectoryId?: string;
     AADGraphOAuthEndPoint?: string;
-    excludedWordsInUserNames?: string;
+    excludedWordsInUPNs?: string;
     excludedUPNs?: string;
     azureDevOpsApiUrl?: string;
     azureDevOpsVSAexBaseUrl?: string;

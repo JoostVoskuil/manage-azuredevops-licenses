@@ -17,7 +17,7 @@ const AzureDevOpsLicensesTrigger: AzureFunction = async function (context: Conte
         AADGraphApplicationId: process.env['AADGraphApplicationId'],
         AADGraphDirectoryId: process.env['AADGraphDirectoryId'],
         AADGraphOAuthEndPoint: process.env['AADGraphOAuthEndPoint'],
-        excludedWordsInUserNames: process.env['excludedWordsInUserNames'],
+        excludedWordsInUPNs: process.env['excludedWordsInUPNs'],
         excludedUPNs: process.env['excludedUPNs'],
         deleteAADUsers: process.env['deleteAADUsers'] ? Boolean(process.env['deleteAADUsers']): false,
         azureDevOpsApiUrl: process.env['azureDevOpsApiUrl'],

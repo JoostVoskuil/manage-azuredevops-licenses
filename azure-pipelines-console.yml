@@ -4,7 +4,7 @@ trigger:
   variables:
     azureResourceManagerConnection: 'Functions'
     azureFunctionsAppName: 'AzureDevOpsFunct'
-    azureDevOpsOrganisationName: ''
+    azureDevOpsOrganizationName: ''
     azureDevOpsPersonalAccessToken: ''
     AADGraphDirectoryId: ''
     AADGraphApplicationId: ''
@@ -27,6 +27,6 @@ trigger:
       script: 'npm run build-code'
     displayName: 'Run NPM Install and Typescript compile'
   
-  - bash: 'node ConsoleApp.js -azureDevOpsOrganisationName $(azureDevOpsOrganisationName) -azureDevOpsPersonalAccessToken $(azureDevOpsPersonalAccessToken) -AADGraphDirectoryId $(AADGraphDirectoryId) -AADGraphApplicationId $(AADGraphApplicationId) -AADGraphApplicationToken $(AADGraphApplicationToken) -disableAPIOperations $(disableAPIOperations) -deleteAADUsers $(deleteAADUsers)'
+  - bash: 'node ConsoleApp.js -azureDevOpsOrganizationName $(azureDevOpsOrganizationName) -azureDevOpsPersonalAccessToken $(azureDevOpsPersonalAccessToken) -AADGraphDirectoryId $(AADGraphDirectoryId) -AADGraphApplicationId $(AADGraphApplicationId) -AADGraphApplicationToken $(AADGraphApplicationToken) -disableAPIOperations $(disableAPIOperations) -deleteAADUsers $(deleteAADUsers)'
     workingDirectory: '$(System.DefaultWorkingDirectory)\dist'
     displayName: 'Run Console Application'

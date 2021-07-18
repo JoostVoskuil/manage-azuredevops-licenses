@@ -7,7 +7,7 @@
     "azureDevOpsVSAexBaseUrl": "https://vsaex.dev.azure.com",
     "disableAPIOperations": true,
     "AADGraphOAuthEndPoint": "https://login.microsoftonline.com",  
-    "excludedWordsInUserNames": "svc,service",
+    "excludedWordsInUPN": "svc,service",
     "excludedUPNs": "upn1@company.onmicrosoft.com",
     "deleteAADUsers": false
 }

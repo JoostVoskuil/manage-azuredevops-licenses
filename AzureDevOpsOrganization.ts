@@ -95,16 +95,25 @@ export class AzureDevOpsOrganization {
      * @return { AzureDevOpsOrganization } this object
      */
     private async getAllUserEntitlements(): Promise<this> {
-        const excludedWords = Settings.getConfiguration().excludedWordsInUserNames;
+        const excludedWords = Settings.getConfiguration().excludedWordsInUPNs;
         const excludedUPNs = Settings.getConfiguration().excludedUPNs;
         // Use old version of the API. Newer versions don't support top/continuationtoken
         const response = await AzureDevOpsConnection.get<IUserEntitlementResponse>(`_apis/userentitlements?api-version=4.1-preview.1&top=10000&select=Grouprules`);
-        // filter excluded words
-        let userEntitlements = response.result.value.filter(x => !this.containsAny(x.user.displayName, excludedWords));
-        // filter excluded upn's
-        userEntitlements = response.result.value.filter(x => !this.containsAny(x.user.displayName, excludedUPNs));
-        Logger.log(`Fetched ${userEntitlements.length} users from Azure DevOps organization '${this.organizationName}'`);
-        this.userEntitlements = plainToClass(UserEntitlement, userEntitlements);
+        const allUserEntitlements = response.result.value;
+        Logger.log(`Fetched ${allUserEntitlements.length} users from Azure DevOps organization '${this.organizationName}'`);
+        
+        // filter excluded words and excluded upn's
+        let includedUserEntitlements = allUserEntitlements.filter(x => !this.containsAny(x.user.principalName, excludedWords));
+        includedUserEntitlements = response.result.value.filter(x => !this.containsAny(x.user.principalName, excludedUPNs));
+        const excludedUserEntitlements = allUserEntitlements.filter(({ user: id1 }) => !includedUserEntitlements.some(({ user: id2 }) => id2 === id1));
+
+       
+        Logger.log(`Excluded UserEntitlements:'`);
+        for (const entitlement of excludedUserEntitlements) {
+            Logger.log(`  ${entitlement.user.principalName}'`);
+        }
+
+        this.userEntitlements = plainToClass(UserEntitlement, includedUserEntitlements);
         return this;
     }
 
@@ -192,6 +201,7 @@ export class AzureDevOpsOrganization {
      * @return { boolean } true if found, false if not found
      */
     private containsAny(searchString: string, dictionary: string): boolean {
+        if (dictionary === undefined) return false;
         const dictionaryArray = dictionary.split(',');
         for (let i = 0; i != dictionaryArray.length; i++) {
             const substring: string = dictionaryArray[i];
