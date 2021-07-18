@@ -1,0 +1,32 @@
+trigger:
+  - main
+  
+  variables:
+    azureResourceManagerConnection: 'Functions'
+    azureFunctionsAppName: 'AzureDevOpsFunct'
+    azureDevOpsOrganisationName: ''
+    azureDevOpsPersonalAccessToken: ''
+    AADGraphDirectoryId: ''
+    AADGraphApplicationId: ''
+    AADGraphApplicationToken: ''
+    disableAPIOperations: true
+  
+  pool:
+    vmImage: 'ubuntu-latest'
+  
+  steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '12.x'
+      checkLatest: true
+    displayName: 'Setup Node'
+  
+  - task: Bash@3
+    inputs:
+      targetType: 'inline'
+      script: 'npm run build-code'
+    displayName: 'Run NPM Install and Typescript compile'
+  
+  - bash: 'node ConsoleApp.js -azureDevOpsOrganisationName $(azureDevOpsOrganisationName) -azureDevOpsPersonalAccessToken $(azureDevOpsPersonalAccessToken) -AADGraphDirectoryId $(AADGraphDirectoryId) -AADGraphApplicationId $(AADGraphApplicationId) -AADGraphApplicationToken $(AADGraphApplicationToken) -disableAPIOperations $(disableAPIOperations) -deleteAADUsers $(deleteAADUsers)'
+    workingDirectory: '$(System.DefaultWorkingDirectory)\dist'
+    displayName: 'Run Console Application'
