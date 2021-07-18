@@ -6,7 +6,7 @@ When a new AAD user enters the Azure DevOps organization for the first time, the
 
 However, there are two problems with the link between Azure DevOps and Azure Active Directory:
 
-- When the user is deleted (or made inactive) in the AAD, the user is still active in Azure DevOps. The user cannot login anymore through the web interface but the personal access tokens are still active. 
+- When the user is deleted (or made inactive) in the AAD, the user is still active in Azure DevOps. The user cannot login anymore through the web interface but the personal access tokens are still active.
 - When an user is not using Azure DevOps, the user might occupy a paid license;
 
 To save money and to lower security risks, this little utility is created. It creates four so called 'Group Entitlements' and make users member of those Group Entitlements.
